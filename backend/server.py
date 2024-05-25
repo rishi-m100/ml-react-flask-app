@@ -1,8 +1,6 @@
-from flask import Flask, request, jsonify
+from flask import Flask, request, jsonify, send_from_directory
 from flask_cors import CORS
 import os
-
-# Importing deps for image prediction
 from tensorflow.keras.preprocessing import image
 from PIL import Image
 import numpy as np
@@ -12,33 +10,36 @@ app = Flask(__name__, static_folder='./build', static_url_path='/')
 CORS(app, resources={r"/*": {"origins": "http://localhost:3000"}})
 
 @app.route("/")
-def home():
-    return {"message": "Hello from backend"}
+def serve():
+    return send_from_directory(app.static_folder, 'index.html')
 
 @app.route("/upload", methods=['POST'])
 def upload():
     file = request.files['file']
-    file.save('uploads/' + file.filename)
+    file.save(os.path.join('uploads', file.filename))
 
     # Load the image to predict
-    img_path = f"./uploads/{file.filename}"
+    img_path = os.path.join('uploads', file.filename)
     img = image.load_img(img_path, target_size=(150, 150))
     x = image.img_to_array(img)
     x = np.expand_dims(x, axis=0)
     x /= 255
 
-    loaded_model = load_model('./models/dogs_cat_model.h5')
+    loaded_model = load_model('models/dogs_cat_model.h5')
 
     # Make the prediction
     prediction = loaded_model.predict(x)
-    # if os.path.exists(f"./uploads/{file.filename}"):
-    #     os.remove(f"uploads/{file.filename}")
+    # if os.path.exists(img_path):
+    #     os.remove(img_path)
         
     if prediction < 0.5:
         return jsonify({"message": "Cat"})
     else:
         return jsonify({"message": "Dog"})
 
+@app.route('/<path:path>')
+def static_proxy(path):
+    return send_from_directory(app.static_folder, path)
 
 if __name__ == '__main__':
     app.run(debug=True)
