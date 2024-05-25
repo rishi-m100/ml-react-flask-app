@@ -3,10 +3,10 @@ import axios from "axios";
 
 function App() {
   const [data, setData] = useState("");
-  // const [val, setVal] = useState("Upload image to predict");
   const [val, setVal] = useState("_________");
-
   const [filename, setFilename] = useState("No file Uploaded");
+  const [file, setFile] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null); // State to store image preview URL
 
   useEffect(() => {
     fetch("/")
@@ -16,7 +16,6 @@ function App() {
         setData(data.message);
       });
   }, []);
-  const [file, setFile] = useState(null);
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -34,9 +33,15 @@ function App() {
       console.error(error);
     }
   };
+
   const handleFileUpload = (event) => {
     const file = event.target.files[0];
     setFilename(file.name);
+
+    // Create a temporary URL for image preview
+    setImagePreview(URL.createObjectURL(file));
+
+    setFile(file);
   };
 
   return (
@@ -71,7 +76,6 @@ function App() {
               name="file"
               className="hidden"
               onChange={(e) => {
-                setFile(e.target.files[0]);
                 handleFileUpload(e);
               }}
             />
@@ -80,9 +84,14 @@ function App() {
         <center>
           <span className="text-white">File Uploaded : {filename}</span>
         </center>
-        <div className="flex items-center justify-center">
+        {imagePreview && ( // Display image preview if available
+          <div className="flex items-center justify-center mt-5">
+            <img src={imagePreview} alt="Uploaded" className="max-w-full max-h-60" />
+          </div>
+        )}
+        <div className="flex items-center justify-center mt-5">
           <button
-            className="flex bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full mt-5"
+            className="flex bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-full"
             type="submit"
           >
             PREDICT
