@@ -1,6 +1,6 @@
 staticSites:
   - name: ml-react-flask-app
-    staticPublishPath: public
+    staticPublishPath: client/build
     buildCommand: cd backend && pip install -r requirements.txt
     routes:
       - src: /*
