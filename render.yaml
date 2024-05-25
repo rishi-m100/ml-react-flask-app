@@ -3,5 +3,5 @@ staticSites:
     staticPublishPath: build
     buildCommand: cd backend && pip install -r requirements.txt
     routes:
-      - src: /
+      - src: /*
         dest: /index.html
